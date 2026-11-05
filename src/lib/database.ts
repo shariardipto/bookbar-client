@@ -25,6 +25,11 @@ export function getAuthDatabase() {
     }
   }
   // Keep one pool across Next.js development reloads and warm server invocations.
-  // Better Auth's adapter will manage its own collections in P03.
+  // Better Auth's adapter manages its own collections.
   return globalThis.bookbarAuthMongo.client.db(globalThis.bookbarAuthMongo.databaseName);
+}
+
+export function getAuthMongoClient() {
+  getAuthDatabase();
+  return globalThis.bookbarAuthMongo!.client;
 }
