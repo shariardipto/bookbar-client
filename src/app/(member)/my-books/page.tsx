@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import { requireMember } from "@/lib/member-session";
-import { MemberWorkspace } from "@/components/auth/member-workspace";
+import { MyBooks } from "@/components/books/my-books";
 
 export const metadata: Metadata = { title: "My Books" };
 export default async function MyBooksPage() {
-  await requireMember("/my-books");
+  const { user } = await requireMember("/my-books");
   return (
-    <MemberWorkspace
-      title="Your books, shared."
-      description="This is where the books you contribute will live. Sharing and managing books will be available when the library opens."
-    />
+    <MyBooks member={{ id: user.id, name: user.name, email: user.email }} />
   );
 }

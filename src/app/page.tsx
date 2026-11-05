@@ -10,16 +10,12 @@ import {
 import { HeroSlider } from "@/components/home/hero-slider";
 import { CategorySection } from "@/components/home/category-section";
 import { HowItWorks } from "@/components/home/how-it-works";
-import { BookGrid } from "@/components/books/book-grid";
-import { PreviewNotice } from "@/components/books/preview-notice";
+import { LatestBooks } from "@/components/books/latest-books";
 import { Button } from "@/components/ui/button";
-import { previewBooks } from "@/lib/preview-books";
-import { filterBooks } from "@/lib/catalog-filter";
 
 export const metadata: Metadata = { title: { absolute: "BookBar | Home" } };
 
 export default function Home() {
-  const latestBooks = filterBooks(previewBooks).slice(0, 6);
   return (
     <>
       <h1 className="sr-only">BookBar. Your next chapter starts here.</h1>
@@ -57,10 +53,9 @@ export default function Home() {
             <ArrowUpRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
-        <div className="mt-5 mb-7">
-          <PreviewNotice />
+        <div className="mt-8">
+          <LatestBooks />
         </div>
-        <BookGrid books={latestBooks} />
         <div className="mt-9 text-center">
           <Button
             variant="outline"

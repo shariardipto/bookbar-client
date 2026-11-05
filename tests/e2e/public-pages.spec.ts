@@ -1,8 +1,42 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { mkdir } from "node:fs/promises";
+import { previewBooks } from "../../src/lib/preview-books";
 
-test("home has six preview books and three usable, manually controlled slides", async ({
+// Deterministic API transport fixtures for public UI checks only. Real Atlas,
+// uploads, sessions and mutations are verified separately by test:live.
+test.beforeEach(async ({ page }) => {
+  await page.route("http://localhost:5000/books?**", (route) => {
+    const limit = new URL(route.request().url()).searchParams.get("limit");
+    const records = previewBooks.map((book, index) => ({
+      ...book,
+      _id: String(index + 1).padStart(24, "0"),
+      copies: 2,
+      totalCopies: 2,
+    }));
+    return route.fulfill({
+      json: {
+        success: true,
+        data: limit ? records.slice(0, Number(limit)) : records,
+      },
+    });
+  });
+  await page.route("http://localhost:5000/books", (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: previewBooks.map((book, index) => ({
+          ...book,
+          _id: String(index + 1).padStart(24, "0"),
+          copies: 2,
+          totalCopies: 2,
+        })),
+      },
+    }),
+  );
+});
+
+test("home renders six API records and three usable, manually controlled slides", async ({
   page,
 }) => {
   const errors: string[] = [];
@@ -12,7 +46,7 @@ test("home has six preview books and three usable, manually controlled slides", 
   await expect(page.locator("[data-book-card]")).toHaveCount(6);
   await expect(
     page.getByText("These are sample titles", { exact: false }),
-  ).toBeVisible();
+  ).not.toBeVisible();
   await expect(page.locator(".swiper-slide")).toHaveCount(3);
   await expect(page.locator(".swiper-slide-active")).toContainText(
     "Your next chapter",
@@ -89,19 +123,63 @@ test("category links open the filtered collection and details preserve the inten
   page,
 }) => {
   await page.goto("/");
-  await page.locator(".category-tile").filter({ hasText: "Science" }).click();
+  await page
+    .getByRole("link", { name: /Science A world of what ifs\./ })
+    .click();
   await expect(page).toHaveURL(/category=Science/);
   await expect(page.locator("[data-book-card]")).toHaveCount(2);
   await page
     .getByRole("link", { name: "View details for The Time Machine" })
     .click();
   await expect(page).toHaveURL(
-    /\/login\?callbackUrl=%2Fbooks%2Fpreview-time-machine/,
+    /\/login\?callbackUrl=%2Fbooks%2F000000000000000000000002/,
   );
   await expect(
     page.getByRole("form", { name: "Log in to BookBar" }),
   ).toBeVisible();
   await expect(page).toHaveTitle("BookBar | Login");
+});
+
+test("library loading, empty and retry states use API outcomes", async ({
+  page,
+}) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let fail = true;
+  await page.route("http://localhost:5000/books", async (route) => {
+    await gate;
+    await route.fulfill(
+      fail
+        ? {
+            status: 503,
+            json: {
+              success: false,
+              message: "The library is temporarily unavailable.",
+            },
+          }
+        : { json: { success: true, data: [] } },
+    );
+  });
+  await page.goto("/books");
+  await expect(
+    page.getByRole("status", { name: "Loading books" }),
+  ).toBeVisible();
+  release();
+  await expect(
+    page.getByRole("heading", { name: "The shelf needs a moment." }),
+  ).toBeVisible();
+  fail = false;
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "A little room for a good book.",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Add a book", exact: true }).last(),
+  ).toHaveAttribute("href", "/add-book");
 });
 
 test("custom 404 keeps the global shell and has a working home action", async ({

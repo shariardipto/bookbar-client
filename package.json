@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:live": "node --env-file=.env.local node_modules/@playwright/test/cli.js test --config=playwright.live.config.ts",
     "db:check": "node --conditions=react-server --env-file-if-exists=.env.local scripts/check-database.mjs"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "@fontsource/dm-serif-display": "5.3.0",
     "@fontsource/manrope": "5.3.0",
     "@hookform/resolvers": "7.0.3",
+    "@tanstack/react-query": "5.106.1",
     "better-auth": "1.7.18",
     "class-variance-authority": "0.7.1",
     "cn": "0.5.2",

@@ -1,13 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { BookSearch, Search, X } from "lucide-react";
 import {
   categories,
   type CatalogCategory,
   type CatalogSort,
 } from "@/lib/catalog";
-import { previewBooks } from "@/lib/preview-books";
+import { libraryQueries } from "@/lib/library-queries";
+import { catalogBook } from "@/lib/library-types";
+import { BookGridSkeleton } from "./book-grid-skeleton";
+import { LibraryEmpty, LibraryError } from "./library-state";
+import Link from "next/link";
 import { filterBooks } from "@/lib/catalog-filter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,9 +46,15 @@ export function Catalog({
   const [category, setCategory] = useState(initialCategory);
   const [query, setQuery] = useState(initialQuery);
   const [sort, setSort] = useState(initialSort);
+  const collection = useQuery(libraryQueries.books());
   const books = useMemo(
-    () => filterBooks(previewBooks, { category, query, sort }),
-    [category, query, sort],
+    () =>
+      filterBooks((collection.data ?? []).map(catalogBook), {
+        category,
+        query,
+        sort,
+      }),
+    [collection.data, category, query, sort],
   );
 
   function reset() {
@@ -56,7 +67,7 @@ export function Catalog({
   return (
     <section
       className="site-container catalog-section"
-      aria-label="Browse the sample collection"
+      aria-label="Browse the collection"
     >
       <div className="catalog-toolbar">
         <form
@@ -151,7 +162,26 @@ export function Catalog({
           {books.length} {books.length === 1 ? "book" : "books"} to explore
         </p>
       </div>
-      {books.length ? (
+      {collection.isPending ? (
+        <BookGridSkeleton />
+      ) : collection.isError ? (
+        <LibraryError
+          error={collection.error}
+          retry={() => {
+            void collection.refetch();
+          }}
+        />
+      ) : !collection.data.length ? (
+        <LibraryEmpty
+          title="A little room for a good book."
+          description="The shelves are waiting for their first stories. Share a book to start the collection."
+          action={
+            <Button asChild>
+              <Link href="/add-book">Add a book</Link>
+            </Button>
+          }
+        />
+      ) : books.length ? (
         <BookGrid books={books} />
       ) : (
         <div className="empty-catalog">

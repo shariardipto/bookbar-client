@@ -16,8 +16,8 @@ export function BookCover({
   className?: string;
   priority?: boolean;
 }) {
-  const [failed, setFailed] = useState(false);
-  if (failed)
+  const [failedSource, setFailedSource] = useState<string | null>(null);
+  if (failedSource === src)
     return (
       <div
         role="img"
@@ -35,13 +35,13 @@ export function BookCover({
   return (
     <Image
       src={src}
-      alt={`${title} — BookBar preview cover`}
+      alt={`${title} — book cover`}
       width={360}
       height={540}
       className={cn("book-cover", className)}
       unoptimized
       priority={priority}
-      onError={() => setFailed(true)}
+      onError={() => setFailedSource(src)}
     />
   );
 }

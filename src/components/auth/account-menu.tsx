@@ -6,6 +6,7 @@ import { useState } from "react";
 import { DropdownMenu } from "radix-ui";
 import { ChevronDown, LogOut, UserRound } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { MemberAvatar } from "./member-avatar";
@@ -16,6 +17,7 @@ export function LogoutButton({
 }: React.ComponentProps<"button"> & { onComplete?: () => void }) {
   const [pending, setPending] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
   async function logout() {
     setPending(true);
     try {
@@ -25,6 +27,8 @@ export function LogoutButton({
         return;
       }
       onComplete?.();
+      await queryClient.cancelQueries();
+      queryClient.clear();
       toast.success("You have been logged out.");
       router.replace("/");
       router.refresh();

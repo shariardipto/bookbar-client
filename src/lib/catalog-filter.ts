@@ -1,4 +1,4 @@
-import type { CatalogCategory, CatalogSort, PreviewBook } from "./catalog";
+import type { CatalogCategory, CatalogSort, CatalogBook } from "./catalog";
 
 const collator = new Intl.Collator("en", {
   sensitivity: "base",
@@ -6,13 +6,13 @@ const collator = new Intl.Collator("en", {
 });
 
 export function filterBooks(
-  books: readonly PreviewBook[],
+  books: readonly CatalogBook[],
   {
     query = "",
     category = "All",
     sort = "latest",
   }: { query?: string; category?: CatalogCategory; sort?: CatalogSort } = {},
-): PreviewBook[] {
+): CatalogBook[] {
   const search = query.trim().toLocaleLowerCase("en");
 
   return books
@@ -31,8 +31,6 @@ export function filterBooks(
           collator.compare(a.author, b.author) ||
           collator.compare(a.title, b.title)
         );
-      return (
-        b.createdAt.localeCompare(a.createdAt) || collator.compare(a.id, b.id)
-      );
+      return b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id);
     });
 }

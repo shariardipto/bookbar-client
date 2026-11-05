@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { Catalog } from "@/components/books/catalog";
-import { PreviewNotice } from "@/components/books/preview-notice";
 import { isCategory, type CatalogSort } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "All Books",
   description:
-    "Browse the BookBar collection preview by title, author, or category and discover your next great read.",
+    "Browse BookBar by title, author, or category and discover your next great read.",
 };
 
 export default async function BooksPage({
@@ -47,9 +46,6 @@ export default async function BooksPage({
             Old favorites. New perspectives. A little something for every kind
             of reader. Take a look around and see what finds you.
           </p>
-          <div className="mt-6">
-            <PreviewNotice />
-          </div>
         </div>
       </div>
       <Catalog

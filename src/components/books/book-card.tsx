@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import type { PreviewBook } from "@/lib/catalog";
+import type { CatalogBook } from "@/lib/catalog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "./book-cover";
 
-export function BookCard({ book }: { book: PreviewBook }) {
+export function BookCard({ book }: { book: CatalogBook }) {
   return (
     <Card
       className="book-card group gap-0 overflow-hidden rounded-xl border bg-white p-3.5 shadow-none"
@@ -24,6 +24,15 @@ export function BookCard({ book }: { book: PreviewBook }) {
           {book.title}
         </h3>
         <p className="mt-2 text-[13px] leading-6 text-slate">{book.author}</p>
+        {book.copies !== undefined && (
+          <p
+            className={`book-stock ${book.copies === 0 ? "book-stock-empty" : ""}`}
+          >
+            {book.copies > 0
+              ? `${book.copies} of ${book.totalCopies} copies available`
+              : "All copies are out reading"}
+          </p>
+        )}
         <Button
           variant="outline"
           asChild

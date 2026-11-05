@@ -10,13 +10,15 @@ export type Category = (typeof categories)[number];
 export type CatalogCategory = Category | "All";
 export type CatalogSort = "latest" | "title" | "author";
 
-export type PreviewBook = {
+export type CatalogBook = {
   id: string;
   title: string;
   author: string;
   category: Category;
   imageUrl: string;
   createdAt: string;
+  copies?: number;
+  totalCopies?: number;
 };
 
 export function isCategory(value: string | undefined): value is Category {

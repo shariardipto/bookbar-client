@@ -1,7 +1,7 @@
-import type { PreviewBook } from "@/lib/catalog";
+import type { CatalogBook } from "@/lib/catalog";
 import { BookCard } from "./book-card";
 
-export function BookGrid({ books }: { books: readonly PreviewBook[] }) {
+export function BookGrid({ books }: { books: readonly CatalogBook[] }) {
   return (
     <div className="book-grid" data-book-grid>
       {books.map((book) => (

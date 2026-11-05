@@ -137,7 +137,7 @@ test("real server guards preserve all private destinations for signed-out visito
     "/add-book",
     "/my-books",
     "/my-borrows",
-    "/books/preview-time-machine",
+    "/books/000000000000000000000002",
   ]) {
     await page.goto(destination);
     await expect(page).toHaveURL(

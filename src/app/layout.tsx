@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "BookBar | %s",
   },
   description:
-    "Discover a world of stories at BookBar, a small online library made for curious readers. Explore our collection preview.",
+    "Discover a world of stories at BookBar, a small online library made for curious readers. Share a book and find your next read.",
 };
 
 export default function RootLayout({

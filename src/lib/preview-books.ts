@@ -1,6 +1,6 @@
-import type { PreviewBook } from "./catalog";
+import type { CatalogBook as PreviewBook } from "./catalog";
 
-/** P01 fixtures only. P06 must replace every consumer with the MongoDB-backed API.
+/** Test fixtures only. Runtime collection screens use the MongoDB-backed API.
  * IDs deliberately use a preview prefix and are not persistent database IDs.
  * Cover artwork is original BookBar artwork, not a reproduction of a publisher's edition.
  */
