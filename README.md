@@ -2,7 +2,7 @@
 
 A small online library with a premium Midnight Editorial design: navy, porcelain, and copper. The product name is an owner-approved customization of the original BookNook assignment.
 
-**Current phase:** P03 authentication is implemented; live acceptance is blocked by Atlas TLS connectivity. P02 database integration checks remain incomplete. Public browsing still uses labeled preview data.
+**Current phase:** P02 database acceptance is DONE: both applications connect, with validators/indexes and transaction checks passing after the Atlas IP-access update. P03 authentication is implemented and ready for live acceptance. Public browsing still uses labeled preview data.
 
 **Live website:** Not deployed; production deployment is scheduled for P08.
 **GitHub remote:** `origin` is configured locally. Changes are committed locally; no push is performed in this phase.
