@@ -36,6 +36,21 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
+test("loopback URLs preserve filters and private destinations on the canonical host", async ({
+  page,
+}) => {
+  await page.goto("http://127.0.0.1:3000/books?category=Science&q=Wells");
+  await expect(page).toHaveURL(
+    "http://localhost:3000/books?category=Science&q=Wells",
+  );
+  await expect(page.getByRole("searchbox")).toHaveValue("Wells");
+  await expect(page.locator("[data-book-card]")).toHaveCount(1);
+  await page.goto("http://127.0.0.1:3000/my-books");
+  await expect(page).toHaveURL(
+    "http://localhost:3000/login?callbackUrl=%2Fmy-books",
+  );
+});
+
 test("home renders six API records and three usable, manually controlled slides", async ({
   page,
 }) => {
