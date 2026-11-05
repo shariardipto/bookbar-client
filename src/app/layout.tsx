@@ -3,6 +3,7 @@ import "./globals.css";
 import { bodyFont, displayFont } from "@/lib/fonts";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { AppProviders } from "@/components/app-providers";
 
 export const metadata: Metadata = {
   title: {
@@ -23,12 +24,14 @@ export default function RootLayout({
       className={`${bodyFont.variable} ${displayFont.variable}`}
     >
       <body>
+        <AppProviders>
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
         <SiteHeader />
         <main id="main-content">{children}</main>
         <SiteFooter />
+        </AppProviders>
       </body>
     </html>
   );
