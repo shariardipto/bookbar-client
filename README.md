@@ -42,6 +42,8 @@ Open http://localhost:3000. No environment file or provider account is required 
 
 ## Commands
 
+P02 adds a lazy, server-only MongoDB connection for the future Better Auth adapter. Set `MONGODB_URI` and `MONGODB_DB_NAME=bookbar` privately in `.env.local`, then run `npm run db:check` to verify connectivity. This check never prints the connection string. The public P01 preview continues to run without credentials; authentication is not implemented yet. Restart the development process after changing database settings.
+
 | Command | Purpose |
 | --- | --- |
 | `npm run dev` | Local development server on port 3000 |
