@@ -6,6 +6,8 @@ import { useState } from "react";
 import { ArrowUpRight, Menu } from "lucide-react";
 import { Brand } from "./brand";
 import { Button } from "@/components/ui/button";
+import { AccountMenu, LogoutButton } from "@/components/auth/account-menu";
+import { useMemberSession } from "@/components/auth/session-provider";
 import {
   Sheet,
   SheetContent,
@@ -19,10 +21,17 @@ const links = [
   { href: "/", label: "Home" },
   { href: "/books", label: "All Books" },
 ];
+const memberLinks = [
+  { href: "/add-book", label: "Add Book" },
+  { href: "/my-books", label: "My Books" },
+  { href: "/my-borrows", label: "My Borrows" },
+];
 
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { data, isPending, error, refetch } = useMemberSession();
+  const navigation = data?.user ? [...links, ...memberLinks] : links;
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
@@ -36,9 +45,9 @@ export function SiteHeader() {
           <Brand />
           <nav
             aria-label="Main navigation"
-            className="hidden h-full items-center gap-9 md:flex"
+            className="hidden h-full items-center gap-6 lg:flex"
           >
-            {links.map((link) => (
+            {navigation.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -49,10 +58,12 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="hidden items-center gap-2 lg:flex">
+            {isPending ? <span className="account-loading" role="status">Checking membership…</span> : data?.user ? <AccountMenu user={data.user} /> : error ? <Button variant="ghost" onClick={() => refetch()}>Retry session</Button> : <>
             <Button variant="ghost" asChild>
               <Link href="/login">Log in</Link>
             </Button>
+            </>}
             <Button asChild>
               <Link href="/register">
                 Join the library <ArrowUpRight aria-hidden="true" />
@@ -64,7 +75,7 @@ export function SiteHeader() {
               <Button
                 variant="outline"
                 size="icon"
-                className="md:hidden"
+                className="lg:hidden"
                 aria-label="Open navigation menu"
               >
                 <Menu aria-hidden="true" />
@@ -83,7 +94,7 @@ export function SiteHeader() {
                 aria-label="Mobile navigation"
                 className="flex flex-col gap-2 border-y py-5"
               >
-                {links.map((link) => (
+                {navigation.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -97,11 +108,17 @@ export function SiteHeader() {
                 ))}
               </nav>
               <div className="mt-7 flex flex-col gap-3">
+                {isPending ? <span role="status" className="account-loading">Checking membership…</span> : data?.user ? <>
+                  <Button asChild variant="outline"><Link href="/profile" onClick={() => setOpen(false)}>My profile</Link></Button>
+                  <p className="text-xs text-slate break-words">Signed in as {data.user.name}</p>
+                  <LogoutButton onComplete={() => setOpen(false)} />
+                </> : error ? <Button variant="outline" onClick={() => refetch()}>Retry session</Button> : <>
                 <Button asChild>
                   <Link href="/register" onClick={() => setOpen(false)}>
                     Join the library <ArrowUpRight aria-hidden="true" />
                   </Link>
                 </Button>
+                </>}
                 <Button variant="outline" asChild>
                   <Link href="/login" onClick={() => setOpen(false)}>
                     Log in
@@ -109,7 +126,7 @@ export function SiteHeader() {
                 </Button>
               </div>
               <p className="mt-auto pt-8 text-xs leading-relaxed text-slate">
-                The collection is in preview. Membership opens soon.
+                A little space for your next chapter.
               </p>
             </SheetContent>
           </Sheet>
