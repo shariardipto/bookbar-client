@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 import { getAuthEnvironment } from "./auth-env";
 import { getAuth } from "./auth";
+import type { BetterAuthOptions } from "better-auth";
 
 beforeAll(() => {
   vi.stubEnv("BETTER_AUTH_SECRET", "unit-test-only-secret-at-least-32-characters");
@@ -11,7 +12,7 @@ beforeAll(() => {
   vi.stubEnv("GOOGLE_CLIENT_ID", "");
   vi.stubEnv("GOOGLE_CLIENT_SECRET", "");
   // All unit requests share one synthetic IP; production rate limiting stays enabled.
-  getAuth().options.rateLimit = { enabled: false };
+  (getAuth().options as BetterAuthOptions).rateLimit = { enabled: false };
 });
 afterAll(async () => {
   await globalThis.bookbarAuthMongo?.client.close();

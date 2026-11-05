@@ -12,7 +12,7 @@ const authEnvironment = z.object({
   GOOGLE_CLIENT_SECRET: z.string().optional(),
 });
 
-export function getAuthEnvironment(env: NodeJS.ProcessEnv = process.env) {
+export function getAuthEnvironment(env: Record<string, string | undefined> = process.env) {
   const parsed = authEnvironment.safeParse(env);
   if (!parsed.success) {
     const fields = [...new Set(parsed.error.issues.map((issue) => issue.path[0]))];
