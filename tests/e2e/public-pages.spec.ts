@@ -99,7 +99,7 @@ test("category links open the filtered collection and details preserve the inten
     /\/login\?callbackUrl=%2Fbooks%2Fpreview-time-machine/,
   );
   await expect(
-    page.getByText("Membership opens soon", { exact: true }),
+    page.getByRole("form", { name: "Log in to BookBar" }),
   ).toBeVisible();
   await expect(page).toHaveTitle("BookBar | Login");
 });
