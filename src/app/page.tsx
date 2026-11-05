@@ -1,36 +1,104 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BookHeart,
+  Compass,
+  Repeat2,
+} from "lucide-react";
+import { HeroSlider } from "@/components/home/hero-slider";
+import { CategorySection } from "@/components/home/category-section";
+import { HowItWorks } from "@/components/home/how-it-works";
+import { BookGrid } from "@/components/books/book-grid";
+import { PreviewNotice } from "@/components/books/preview-notice";
+import { Button } from "@/components/ui/button";
+import { previewBooks } from "@/lib/preview-books";
+import { filterBooks } from "@/lib/catalog-filter";
+
+export const metadata: Metadata = { title: { absolute: "BookBar | Home" } };
 
 export default function Home() {
+  const latestBooks = filterBooks(previewBooks).slice(0, 6);
   return (
-    <div className="flex min-h-svh flex-col">
-      <header className="mx-auto w-full max-w-6xl px-6 py-7 sm:px-10">
-        <Link href="/" aria-label="BookBar home" className="wordmark inline-block text-3xl tracking-tight">
-          BookBar<span className="text-copper">.</span>
-        </Link>
-      </header>
-
-      <main id="main-content" className="mx-auto flex w-full max-w-6xl flex-1 items-center px-6 py-14 sm:px-10 sm:py-24">
-        <section aria-labelledby="welcome-title" className="max-w-3xl">
-          <p className="mb-7 flex items-center gap-3 text-xs font-semibold tracking-[0.2em] uppercase text-slate">
-            <span aria-hidden="true" className="h-px w-9 bg-copper" />
-            A small online library
-          </p>
-          <h1 id="welcome-title" className="display-heading text-5xl leading-[1.08] tracking-tight text-navy sm:text-7xl">
-            Every great read starts a new chapter.
-          </h1>
-          <p className="mt-8 max-w-xl text-lg leading-relaxed text-slate">
-            We’re preparing a thoughtful space to discover books, share your shelves,
-            and borrow something worth getting lost in.
-          </p>
-          <p className="mt-10 inline-flex rounded-full border border-mist bg-white px-5 py-2.5 text-sm font-medium text-navy">
-            Library opening soon
-          </p>
-        </section>
-      </main>
-
-      <footer className="border-t border-mist px-6 py-6 sm:px-10">
-        <p className="mx-auto max-w-6xl text-sm text-slate">BookBar · A little space for a world of stories.</p>
-      </footer>
-    </div>
+    <>
+      <h1 className="sr-only">BookBar. Your next chapter starts here.</h1>
+      <div className="site-container pt-6 sm:pt-8">
+        <HeroSlider />
+      </div>
+      <div className="site-container shelf-notes">
+        <p>
+          <Compass aria-hidden="true" /> A story for every mood
+        </p>
+        <span aria-hidden="true" />
+        <p>
+          <BookHeart aria-hidden="true" /> A shelf worth sharing
+        </p>
+        <span aria-hidden="true" />
+        <p>
+          <Repeat2 aria-hidden="true" /> Read. Return. Repeat.
+        </p>
+      </div>
+      <section
+        className="site-container section-space pt-8! sm:pt-10!"
+        aria-labelledby="arrivals-title"
+      >
+        <div className="section-heading-row">
+          <div>
+            <p className="section-eyebrow mb-3">
+              Fresh stories, familiar comforts
+            </p>
+            <h2 id="arrivals-title" className="section-title">
+              New on the shelves.
+            </h2>
+          </div>
+          <Link href="/books" className="text-link">
+            Explore all books{" "}
+            <ArrowUpRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+        <div className="mt-5 mb-7">
+          <PreviewNotice />
+        </div>
+        <BookGrid books={latestBooks} />
+        <div className="mt-9 text-center">
+          <Button
+            variant="outline"
+            size="lg"
+            asChild
+            className="bg-transparent"
+          >
+            <Link href="/books">
+              See All Books <ArrowRight aria-hidden="true" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+      <CategorySection />
+      <HowItWorks />
+      <section
+        className="reading-invitation"
+        aria-labelledby="invitation-title"
+      >
+        <div className="site-container flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+          <div>
+            <p className="section-eyebrow mb-3">
+              There’s always another chapter
+            </p>
+            <h2
+              id="invitation-title"
+              className="display-heading text-[clamp(1.8rem,3vw,2.5rem)] leading-tight text-navy"
+            >
+              A good book is waiting for you.
+            </h2>
+          </div>
+          <Button size="lg" asChild>
+            <Link href="/books">
+              Find your next read <ArrowUpRight aria-hidden="true" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+    </>
   );
 }

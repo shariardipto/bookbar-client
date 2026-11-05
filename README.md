@@ -2,10 +2,21 @@
 
 A small online library with a premium Midnight Editorial design: navy, porcelain, and copper. The product name is an owner-approved customization of the original BookNook assignment.
 
-**Current phase:** P00 foundation. The Next.js application serves an opening-soon page; the full library is not implemented yet.
+**Current phase:** P01 public interface. The app presents a working collection preview; database, authentication, and borrowing integrations come in later phases.
 
 **Live website:** Not deployed; production deployment is scheduled for P08.
-**GitHub remote:** Not configured; this is currently a local repository.
+**GitHub remote:** `origin` is configured locally. P01 changes are committed locally; no push is performed in this phase.
+
+## Implemented features
+
+- A three-slide Swiper homepage with manual controls, book artwork, and six preview arrivals.
+- A nine-title collection with title/author search, five category filters, and sorting; filter state survives refresh through the URL.
+- Midnight Editorial styling with locally served DM Serif Display/Manrope and original vector book covers.
+- Responsive navigation, a focus-managed mobile menu, and a shared footer across public/account-preview/404 pages.
+- Consistent book cards, accessible cover fallbacks, loading skeletons, a resettable empty state, and a retryable error boundary.
+- Route-specific titles, a custom favicon, and a custom 404 with working home/catalog navigation.
+
+The collection is explicitly labeled as sample data. Login/Register are membership-preview pages; sample detail links preserve their intended callback URL at the login entry. Real authentication/session checks begin in P03. No fake books, session, availability, provider integration, or live MongoDB query is presented as complete.
 
 ## Planned library features
 
@@ -16,7 +27,7 @@ A small online library with a premium Midnight Editorial design: navy, porcelain
 - Review active loans and return books from My Borrows.
 - Keep authenticated access on private-page refresh and return to intended pages after login.
 
-These are planned assignment features, not claims of completed integrations. P00 includes a branded baseline, strict TypeScript, Tailwind CSS build plumbing, lint/typecheck/build/test scripts, reproducible dependencies, and phase documentation. P01 introduces the full public UI, shadcn components, and final fonts.
+Live database-backed catalog retrieval, registration/Google sign-in, book management, uploads, and borrowing remain planned features. P01's preview UI does not satisfy their live acceptance checks.
 
 ## Local setup
 
@@ -27,7 +38,7 @@ npm ci --include=dev
 npm run dev
 ```
 
-Open http://localhost:3000. No environment file or provider account is required for P00. Later, copy `.env.example` to `.env.local` and populate values privately only as their setup gates are reached. Never expose database/auth/image secrets through `NEXT_PUBLIC_*` variables.
+Open http://localhost:3000. No environment file or provider account is required for P00/P01. Later, copy `.env.example` to `.env.local` and populate values privately only as their setup gates are reached. Never expose database/auth/image secrets through `NEXT_PUBLIC_*` variables.
 
 ## Commands
 
@@ -38,7 +49,12 @@ Open http://localhost:3000. No environment file or provider account is required 
 | `npm start` | Serve an existing production build on port 3000 |
 | `npm run lint` | ESLint, with no warnings allowed |
 | `npm run typecheck` | Generate Next.js route types, then strict TypeScript checks |
-| `npm test` | Run Vitest; reports zero tests until client feature tests exist |
+| `npm test` | Run the catalog filter/sort unit tests |
+| `npm run test:e2e` | Run browser/accessibility/responsive tests against a production build |
+
+For browser verification, build first with `npm run build`, then run `npm run test:e2e` with port 3000 free. The configuration uses installed Google Chrome in headless mode and starts/stops its own Next.js process. Screenshots are saved to ignored `.cache/p01/`; the HTML report is in ignored `playwright-report/`. The tested public routes are `/`, `/books`, `/login`, `/register`, and `/a-lost-chapter` (404). `/books?category=Science` demonstrates a filtered entry; `/books/preview-time-machine` demonstrates the temporary login entry.
+
+Original preview artwork can be regenerated with `node scripts/generate-preview-covers.mjs`. These covers are BookBar illustrations, not publisher-edition reproductions. Replace the documented fixture consumers during P06; real MongoDB sorting/limit and availability must be verified then. The footer still needs the owner's public contact details and profile links before launch.
 
 The client will own Better Auth session handling, JWKS, and the authenticated imgbb Server Action. The separate Express server will own book/borrow rules and validate service JWTs. Those integrations are not part of P00.
 

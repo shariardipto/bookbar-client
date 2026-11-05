@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { bodyFont, displayFont } from "@/lib/fonts";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
   title: {
@@ -8,13 +10,26 @@ export const metadata: Metadata = {
     template: "BookBar | %s",
   },
   description:
-    "A thoughtful space to discover books, share your shelves, and find your next great read. BookBar is opening soon.",
+    "Discover a world of stories at BookBar, a small online library made for curious readers. Explore our collection preview.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${bodyFont.variable} ${displayFont.variable}`}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${bodyFont.variable} ${displayFont.variable}`}
+    >
+      <body>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <SiteHeader />
+        <main id="main-content">{children}</main>
+        <SiteFooter />
+      </body>
     </html>
   );
 }
