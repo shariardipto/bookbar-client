@@ -801,6 +801,25 @@
   color: #85513e;
   font-size: 11px;
 }
+
+.auth-page .membership-copy { width: 100%; }
+.auth-form, .auth-social { width: 100%; }
+.auth-form { display: grid; gap: 18px; }
+.auth-field { display: grid; gap: 7px; min-width: 0; }
+.auth-field label { color: #14213d; font-size: 12px; font-weight: 700; }
+.auth-field input { height: 44px; background: #fff; padding-inline: 12px; }
+.auth-hint { color: #526077; font-size: 11px; line-height: 1.65; }
+.auth-error { color: #ad2828; font-size: 12px; line-height: 1.6; }
+.auth-password { position: relative; }
+.auth-password input { padding-right: 48px; }
+.auth-password button { position: absolute; top: 0; right: 0; }
+.auth-divider { display: flex; align-items: center; gap: 15px; margin-block: 22px; color: #526077; font-size: 11px; }
+.auth-divider::before, .auth-divider::after { content: ""; height: 1px; flex: 1; background: #dce1e9; }
+.auth-switch { margin-top: 22px; color: #526077; font-size: 12px; line-height: 1.8; }
+.auth-switch a, .auth-forgot { color: #8d4d36; text-decoration: underline; text-underline-offset: 4px; }
+.auth-forgot { min-height: 44px; justify-self: end; font-size: 11px; cursor: pointer; }
+.auth-back-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; min-height: 44px; font-size: 11px; color: #526077; }
+.auth-status { width: 100%; border-radius: 8px; background: #edf0f6; padding: 12px 14px; font-size: 12px; line-height: 1.7; color: #14213d; }
 .not-found-page {
   display: grid;
   min-height: 590px;
