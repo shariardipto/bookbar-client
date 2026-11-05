@@ -1,8 +1,8 @@
 # BookBar client
 
-Read `docs/AGENTS.md`, `docs/B14-A8-Cat_Ron.md`, `docs/BookBar_Master_Blueprint.md`, `docs/DECISIONS.md`, `docs/IMPLEMENTATION_LOG.md`, and `docs/MANUAL_HANDOFFS.md` first. This is an independent Git repository. Respect the owner's currently authorized phase.
+Reading priority: current task/conversation; workspace `../docs/ACTIVE_CONTEXT.md`; relevant source; relevant blueprint section; assignment only for clarification/final verification. Do not reread whole documents already in context. This is an independent repository; preserve owner changes and history. In a standalone checkout, use README and the archived documents for missing context.
 
-Use Next.js App Router and strict TypeScript. Read relevant version-specific documentation in `node_modules/next/dist/docs/` before changing framework code; current APIs may differ from older tutorials. Authentication belongs in Next.js; secret values must stay server-side. The owner-approved product name is BookBar, with the Midnight Editorial visual direction. Run relevant checks and report actual results. Keep `docs` current; synchronize workspace planning updates when working inside the larger local workspace.
+Use Next.js App Router and strict TypeScript. Consult relevant bundled Next.js docs when changing unfamiliar framework behavior. Authentication and secure uploads belong in Next.js; keep secrets server-only. Preserve BookBar/Midnight Editorial branding. Run focused tests and affected lint/typecheck; build after major integration changes. Primary progress lives at workspace level; do not copy logs between repositories or redo P00/P01. Advance P02 onward only after required exits; pause dependent work at real manual setup gates.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
