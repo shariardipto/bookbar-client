@@ -15,6 +15,7 @@ function createAuth() {
     secret: env.BETTER_AUTH_SECRET,
     database: mongodbAdapter(getAuthDatabase(), { client: getAuthMongoClient() }),
     trustedOrigins: [env.BETTER_AUTH_URL],
+    advanced: { disableOriginCheck: false, disableCSRFCheck: false },
     emailAndPassword: {
       enabled: true,
       minPasswordLength: 6,
