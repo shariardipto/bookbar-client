@@ -43,7 +43,12 @@ test("real upload, book management, borrowing, return and persisted private sess
   let memberId = "",
     stage = "database connection";
   const errors: string[] = [];
+  let nativeDialogs = 0;
   page.on("pageerror", (error) => errors.push(error.name));
+  page.on("dialog", async (dialog) => {
+    nativeDialogs++;
+    await dialog.dismiss();
+  });
   try {
     try {
       await Promise.all([authClient.connect(), dataClient.connect()]);
@@ -84,6 +89,42 @@ test("real upload, book management, borrowing, return and persisted private sess
       "P06 Reader",
     );
 
+    stage = "private route refresh, metadata and member empty states";
+    for (const [path, title, heading] of [
+      ["/profile", "My Profile", "A little about you."],
+      ["/my-books", "My Books", "Your first story starts here."],
+      ["/my-borrows", "My Borrows", "An open shelf. Endless possibilities."],
+    ]) {
+      await page.goto(path);
+      await page.reload();
+      await expect(page).toHaveURL(path);
+      await expect(page).toHaveTitle(`BookBar | ${title}`);
+      await expect(
+        page.getByRole("heading", { name: heading, exact: true }),
+      ).toBeVisible();
+      for (const width of [360, 768, 1440]) {
+        await page.setViewportSize({ width, height: 1000 });
+        check(
+          await page.evaluate(
+            () =>
+              document.documentElement.scrollWidth <=
+              document.documentElement.clientWidth + 1,
+          ),
+          "P06 layout: private route overflow",
+        );
+      }
+      await accessible(page);
+    }
+    await page.goto(`/books/${new ObjectId().toString()}`);
+    await expect(
+      page.getByRole("heading", {
+        name: "This book has left the shelf.",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await page.goto("/add-book");
+    await expect(page).toHaveTitle("BookBar | Add Book");
+
     stage = "form validation and responsive Add Book";
     await mkdir(".cache/p06", { recursive: true });
     await page.getByRole("button", { name: "Add book", exact: true }).click();
@@ -114,6 +155,20 @@ test("real upload, book management, borrowing, return and persisted private sess
     await page.getByLabel("Category", { exact: true }).selectOption("Fiction");
     await page.getByLabel("Total copies", { exact: true }).fill("2");
     await page.getByLabel("About this book", { exact: true }).fill(description);
+    stage = "real upload validation and recovery";
+    await page
+      .getByLabel("Cover image", { exact: true })
+      .setInputFiles({
+        name: "disguised.png",
+        mimeType: "image/png",
+        buffer: Buffer.from("This is not an image."),
+      });
+    await expect(page.locator("#book-cover-error")).toHaveText(
+      "This file does not match its image format. Choose another image.",
+    );
+    await expect(
+      page.getByText("Your cover is ready.", { exact: true }),
+    ).toHaveCount(0);
     // A synthetic 1px PNG is the only asset sent to the real image provider.
     await page.getByLabel("Cover image", { exact: true }).setInputFiles({
       name: "bookbar-test-cover.png",
@@ -133,6 +188,7 @@ test("real upload, book management, borrowing, return and persisted private sess
     await expect(
       page.getByRole("heading", { name: "A P06 Reading Journey", exact: true }),
     ).toBeVisible();
+    await expect(page).toHaveTitle("A P06 Reading Journey | BookBar");
     const saved = await db
       .collection("books")
       .findOne({ _id: new ObjectId(bookId) });
@@ -384,7 +440,19 @@ test("real upload, book management, borrowing, return and persisted private sess
         .countDocuments({ _id: new ObjectId(bookId) })) === 0,
       "Delete was not persisted",
     );
+    stage = "real browser logout and private route recheck";
+    await page
+      .getByRole("button", {
+        name: "Open account menu for P06 Reader",
+        exact: true,
+      })
+      .click();
+    await page.getByRole("menuitem", { name: "Log out", exact: true }).click();
+    await expect(page).toHaveURL("/");
+    await page.goto("/my-books");
+    await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fmy-books$/);
     expect(errors).toEqual([]);
+    expect(nativeDialogs).toBe(0);
   } catch (error) {
     // Stage labels remain safe; never append raw provider/Mongo/auth responses.
     if (
@@ -417,7 +485,16 @@ test("real upload, book management, borrowing, return and persisted private sess
         .deleteMany({ email, _id: { $in: ids.map((id) => new ObjectId(id)) } });
       check(
         (await db.collection("books").countDocuments({ description })) === 0 &&
-          (await authDb.collection("user").countDocuments({ email })) === 0,
+          (await authDb.collection("user").countDocuments({ email })) === 0 &&
+          (await db
+            .collection("borrows")
+            .countDocuments({ userId: { $in: ids } })) === 0 &&
+          (await authDb
+            .collection("session")
+            .countDocuments({ userId: { $in: ids } })) === 0 &&
+          (await authDb
+            .collection("account")
+            .countDocuments({ userId: { $in: ids } })) === 0,
         "P06 probe cleanup needs attention",
       );
     } catch {

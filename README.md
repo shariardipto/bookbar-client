@@ -2,7 +2,7 @@
 
 A small online library with a premium Midnight Editorial design: navy, porcelain, and copper. The product name is an owner-approved customization of the original BookNook assignment.
 
-**Current phase:** P06 connects the complete library UI to real MongoDB-backed APIs and authenticated imgbb uploads. Email registration/login, private-page refresh, redirect-back and the add/edit/borrow/return/delete workflow pass real browser acceptance. Google's consent/callback still needs verification in P07.
+**Current phase:** P07 automated QA passes; actual Google consent/callback remains a manual verification gate. The complete library UI uses real MongoDB-backed APIs and authenticated imgbb uploads. Email registration/login, private-page refresh, redirect-back and the add/edit/borrow/return/delete workflow pass real browser acceptance.
 
 **Live website:** Not deployed; production deployment is scheduled for P08.
 **GitHub remote:** `origin` is configured locally. Changes are committed locally; no push is performed in this phase.
@@ -26,7 +26,7 @@ A small online library with a premium Midnight Editorial design: navy, porcelain
 
 Runtime screens use real API records. Test fixtures only support deterministic public UI/filter checks; they are not live integration evidence. Real email sessions/JWTs and private browser refresh pass. Google's callback remains unverified. Email verification and password reset are intentionally disabled.
 
-Full QA, Google callback verification and production deployment remain for later phases.
+Google callback verification and production deployment remain outstanding. P07 found and fixed missing cancellation feedback when Google/Better Auth returns repeated `error` query parameters; login now recognizes the Google marker in that array.
 
 ## Local setup
 
@@ -56,7 +56,7 @@ Run `npm run db:check` to verify the pooled server-only MongoDB connection witho
 | `npm run typecheck` | Generate Next.js route types, then strict TypeScript checks |
 | `npm test` | Run unit tests |
 | `npm run test:e2e` | Run browser/accessibility/responsive tests against a production build |
-| `npm run test:live` | Opt-in P06 real-provider/Atlas browser acceptance; both apps must be built and ports 3000/5000 free |
+| `npm run test:live` | Opt-in real-provider/Atlas QA; both apps must be built and ports 3000/5000 free |
 
 For browser verification, build first, leave port 3000 free, and use installed Google Chrome. The configuration starts/stops its own Next process. Focused P03 commands:
 
@@ -66,6 +66,10 @@ npm run test:e2e -- tests/e2e/authentication.spec.ts
 ```
 
 Screenshots are saved to ignored `.cache/p01/`, `.cache/p03/` and `.cache/p06/`; public UI reports are in `playwright-report/`. Standard public/auth tests label transport fixtures and use real signed-out server guards. `test:live` separately exercises real email auth, cookie refresh, JWT/JWKS, imgbb upload, book editing/deletion, borrowing/return, inventory/cache updates, seven-day dates, latest-six ordering, desktop grid and selected responsive/axe checks. It creates uniquely marked synthetic records and cleans only those records in `finally`. Traces, videos and automatic failure screenshots are disabled for its credential flows. It does not test Google consent/callback. One tiny synthetic image is sent to the real provider; deleting a book does not delete its hosted image.
+
+P07 extends live QA with refresh/title/empty-state checks for Profile, My Books and My Borrows, missing-book feedback, malformed-cover rejection/recovery, and real logout. The Google-start test checks the configured local callback/scopes, then simulates `access_denied` to consume its one-time state and verify safe retry feedback. This does not establish a successful Google login. Automated evidence: 73 client unit tests, 91 server unit tests, 18 browser scenarios, 11 real API acceptance groups, 9 Atlas concurrency/rollback groups, and the expanded live browser checks pass; both repositories pass lint/typecheck/build.
+
+To finish the manual Google gate with both apps running, open http://localhost:3000/login?callbackUrl=%2Fprofile, choose **Continue with Google**, and complete account selection/consent in your own browser. Confirm the return to Profile and that a hard refresh keeps the session. Share only PASS/FAIL or a short provider error code, never passwords, codes, cookies, tokens, or the full authorization/callback URL.
 
 Original promotional artwork can be regenerated with `node scripts/generate-preview-covers.mjs`. These covers are BookBar illustrations, not publisher-edition reproductions. Runtime collection records come from MongoDB; sample records remain test-only. The footer still needs the owner's public contact details and profile links before launch.
 

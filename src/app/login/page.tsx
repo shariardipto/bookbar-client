@@ -12,17 +12,18 @@ export default async function LoginPage({
   searchParams: Promise<{
     callbackUrl?: string | string[];
     registered?: string;
-    error?: string;
+    error?: string | string[];
   }>;
 }) {
   const params = await searchParams;
+  const errors = Array.isArray(params.error) ? params.error : [params.error];
   return (
     <AuthShell mode="login">
       <LoginForm
         googleEnabled={isGoogleConfigured()}
         callbackUrl={safeCallbackUrl(params.callbackUrl)}
         registered={params.registered === "1"}
-        googleError={params.error === "google"}
+        googleError={errors.includes("google")}
       />
     </AuthShell>
   );
