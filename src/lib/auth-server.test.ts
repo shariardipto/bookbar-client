@@ -102,3 +102,27 @@ it("reports invalid private field names without their values", () => {
     expect(String(error)).not.toContain(secret);
   }
 });
+
+it("keeps placeholder Google settings disabled and rejects partial real configuration", () => {
+  const base = {
+    BETTER_AUTH_SECRET: "unit-test-only-secret-at-least-32-characters",
+    BETTER_AUTH_URL: "http://localhost:3000",
+  };
+  expect(
+    getAuthEnvironment({
+      ...base,
+      GOOGLE_CLIENT_ID: "replace-with-google-client-id",
+      GOOGLE_CLIENT_SECRET: "your_google_secret",
+    }),
+  ).toMatchObject({
+    GOOGLE_CLIENT_ID: undefined,
+    GOOGLE_CLIENT_SECRET: undefined,
+  });
+  expect(() =>
+    getAuthEnvironment({
+      ...base,
+      GOOGLE_CLIENT_ID: "test-client.apps.googleusercontent.com",
+      GOOGLE_CLIENT_SECRET: "",
+    }),
+  ).toThrow("Set both GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET privately.");
+});

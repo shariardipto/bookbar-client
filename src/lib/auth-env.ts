@@ -1,6 +1,17 @@
 import "server-only";
 import { z } from "zod";
 
+function providerValue(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim();
+  return !normalized ||
+    /^(?:your(?:[-_ ]|$)|replace(?:[-_ ]|$)|placeholder|example)/i.test(
+      normalized,
+    )
+    ? undefined
+    : normalized;
+}
+
 const authEnvironment = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.url().refine((value) => {
@@ -16,8 +27,8 @@ const authEnvironment = z.object({
           ["localhost", "127.0.0.1"].includes(url.hostname)))
     );
   }),
-  GOOGLE_CLIENT_ID: z.string().optional(),
-  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.preprocess(providerValue, z.string().optional()),
+  GOOGLE_CLIENT_SECRET: z.preprocess(providerValue, z.string().optional()),
 });
 
 export function getAuthEnvironment(
@@ -46,7 +57,7 @@ export function getAuthEnvironment(
 
 export function isGoogleConfigured() {
   return Boolean(
-    process.env.GOOGLE_CLIENT_ID?.trim() &&
-    process.env.GOOGLE_CLIENT_SECRET?.trim(),
+    providerValue(process.env.GOOGLE_CLIENT_ID) &&
+    providerValue(process.env.GOOGLE_CLIENT_SECRET),
   );
 }

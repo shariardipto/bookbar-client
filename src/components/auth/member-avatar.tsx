@@ -2,15 +2,18 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { UserRound } from "lucide-react";
 
 export function MemberAvatar({
   name,
   image,
   large = false,
+  decorative = false,
 }: {
   name: string;
   image?: string | null;
   large?: boolean;
+  decorative?: boolean;
 }) {
   const [failedSource, setFailedSource] = useState<string | null>(null);
   const initials =
@@ -22,16 +25,21 @@ export function MemberAvatar({
       .join("")
       .toUpperCase() || "B";
   return (
-    <span className={`member-avatar${large ? " member-avatar-large" : ""}`}>
+    <span
+      className={`member-avatar${large ? " member-avatar-large" : ""}`}
+      aria-hidden={decorative || undefined}
+    >
       {image && /^https?:\/\//i.test(image) && image !== failedSource ? (
         <Image
           src={image}
-          alt={`${name}'s profile photo`}
+          alt={decorative ? "" : `${name}'s profile photo`}
           width={large ? 104 : 36}
           height={large ? 104 : 36}
           unoptimized
           onError={() => setFailedSource(image)}
         />
+      ) : decorative ? (
+        <UserRound className="size-4" aria-hidden="true" />
       ) : (
         <span role="img" aria-label={`${name}'s initials`}>
           {initials}

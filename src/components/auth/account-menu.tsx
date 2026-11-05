@@ -65,7 +65,7 @@ export function AccountMenu({
           aria-label={`Open account menu for ${user.name}`}
           title={user.name}
         >
-          <MemberAvatar name={user.name} image={user.image} />
+          <MemberAvatar name={user.name} image={user.image} decorative />
           <span className="max-w-24 truncate">{user.name.split(" ")[0]}</span>
           <ChevronDown aria-hidden="true" />
         </Button>
