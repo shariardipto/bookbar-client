@@ -2,7 +2,7 @@
 
 A small online library with a premium Midnight Editorial design: navy, porcelain, and copper. The product name is an owner-approved customization of the original BookNook assignment.
 
-**Current phase:** P02 database acceptance is DONE: both applications connect, with validators/indexes and transaction checks passing after the Atlas IP-access update. P03 authentication is implemented and ready for live acceptance. Public browsing still uses labeled preview data.
+**Current phase:** P02 database acceptance is DONE. P04 adds the JWT API helper and verified Express routes. Real email registration/login/session/token/logout passed during API acceptance; P03's Google callback and private browser refresh still need verification. Public browsing continues to use labeled preview data until P06.
 
 **Live website:** Not deployed; production deployment is scheduled for P08.
 **GitHub remote:** `origin` is configured locally. Changes are committed locally; no push is performed in this phase.
@@ -21,7 +21,7 @@ A small online library with a premium Midnight Editorial design: navy, porcelain
 - Email login with safe local return paths, password visibility controls, inline errors and toast feedback. Google on Register goes Home; Google on Login preserves the intended page.
 - Server-checked private routes, session-aware navigation, account dropdown/logout, and a profile drawn from the authenticated session. Book management and borrowing pages are guarded placeholders until P06.
 
-The collection is explicitly labeled as sample data. Real persisted signup/login, private refresh, and Google's callback still need live verification; browser transport stubs only test UI behavior. Email verification and password reset are intentionally disabled.
+The collection is explicitly labeled as sample data. Real email registration/login, cookie sessions, JWT issuance and logout passed API acceptance. Private browser refresh and Google's callback still need live verification; earlier browser transport stubs only test UI behavior. Email verification and password reset are intentionally disabled.
 
 ## Planned library features
 
@@ -72,7 +72,9 @@ Screenshots are saved to ignored `.cache/p01/` and `.cache/p03/`; the latest HTM
 
 Original preview artwork can be regenerated with `node scripts/generate-preview-covers.mjs`. These covers are BookBar illustrations, not publisher-edition reproductions. Replace the documented fixture consumers during P06; real MongoDB sorting/limit and availability must be verified then. The footer still needs the owner's public contact details and profile links before launch.
 
-The client owns Better Auth sessions and JWKS; the authenticated imgbb Server Action comes in P06. Express will validate service JWTs from `authClient.token()` in P04; a Better Auth session cookie is not the API bearer token. JWT issuer/audience match the configured auth origin, with a 15-minute lifetime.
+The client owns Better Auth sessions and JWKS; the authenticated imgbb Server Action comes in P06. Express validates service JWTs from `authClient.token()`; a Better Auth session cookie is not the API bearer token. JWT issuer/audience match the configured auth origin, with a 15-minute lifetime.
+
+`src/lib/api-client.ts` supplies `apiRequest<T>(path, options)`. Protected access is the default; public catalog requests pass `{ authenticated: false }`. It obtains a service JWT per protected request, sends only a bearer header to the configured API origin, omits cookies, and keeps tokens out of persistent storage. A 401 triggers a session recheck and a typed `ApiRequestError`; mutations are not automatically replayed. It unwraps `{ success: true, data }` and preserves structured API errors. Test it with `npm test -- src/lib/api-client.test.ts` (11 checks). P06 will connect this helper to the library screens.
 
 ## Documentation and delivery
 
