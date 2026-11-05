@@ -6,11 +6,15 @@ import { getAuth } from "./auth";
 import { loginUrl } from "./auth-redirect";
 
 export const getMemberSession = cache(async () => {
+  // Let Next's request-time rendering signal propagate during prerendering.
+  const requestHeaders = await headers();
   try {
     // Read the cookie-backed session for this request; do not trust client state.
-    return await getAuth().api.getSession({ headers: await headers() });
+    return await getAuth().api.getSession({ headers: requestHeaders });
   } catch {
-    throw new Error("Your membership session could not be checked. Please try again shortly.");
+    throw new Error(
+      "Your membership session could not be checked. Please try again shortly.",
+    );
   }
 });
 

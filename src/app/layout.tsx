@@ -25,12 +25,12 @@ export default function RootLayout({
     >
       <body>
         <AppProviders>
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-        <SiteHeader />
-        <main id="main-content">{children}</main>
-        <SiteFooter />
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+          <SiteHeader />
+          <main id="main-content">{children}</main>
+          <SiteFooter />
         </AppProviders>
       </body>
     </html>

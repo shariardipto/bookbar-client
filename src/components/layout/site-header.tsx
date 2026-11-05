@@ -59,11 +59,23 @@ export function SiteHeader() {
             ))}
           </nav>
           <div className="hidden items-center gap-2 lg:flex">
-            {isPending ? <span className="account-loading" role="status">Checking membership…</span> : data?.user ? <AccountMenu user={data.user} /> : error ? <Button variant="ghost" onClick={() => refetch()}>Retry session</Button> : <>
-            <Button variant="ghost" asChild>
-              <Link href="/login">Log in</Link>
-            </Button>
-            </>}
+            {isPending ? (
+              <span className="account-loading" role="status">
+                Checking membership…
+              </span>
+            ) : data?.user ? (
+              <AccountMenu user={data.user} />
+            ) : error ? (
+              <Button variant="ghost" onClick={() => refetch()}>
+                Retry session
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/login">Log in</Link>
+                </Button>
+              </>
+            )}
             <Button asChild>
               <Link href="/register">
                 Join the library <ArrowUpRight aria-hidden="true" />
@@ -108,17 +120,35 @@ export function SiteHeader() {
                 ))}
               </nav>
               <div className="mt-7 flex flex-col gap-3">
-                {isPending ? <span role="status" className="account-loading">Checking membership…</span> : data?.user ? <>
-                  <Button asChild variant="outline"><Link href="/profile" onClick={() => setOpen(false)}>My profile</Link></Button>
-                  <p className="text-xs text-slate break-words">Signed in as {data.user.name}</p>
-                  <LogoutButton onComplete={() => setOpen(false)} />
-                </> : error ? <Button variant="outline" onClick={() => refetch()}>Retry session</Button> : <>
-                <Button asChild>
-                  <Link href="/register" onClick={() => setOpen(false)}>
-                    Join the library <ArrowUpRight aria-hidden="true" />
-                  </Link>
-                </Button>
-                </>}
+                {isPending ? (
+                  <span role="status" className="account-loading">
+                    Checking membership…
+                  </span>
+                ) : data?.user ? (
+                  <>
+                    <Button asChild variant="outline">
+                      <Link href="/profile" onClick={() => setOpen(false)}>
+                        My profile
+                      </Link>
+                    </Button>
+                    <p className="text-xs text-slate break-words">
+                      Signed in as {data.user.name}
+                    </p>
+                    <LogoutButton onComplete={() => setOpen(false)} />
+                  </>
+                ) : error ? (
+                  <Button variant="outline" onClick={() => refetch()}>
+                    Retry session
+                  </Button>
+                ) : (
+                  <>
+                    <Button asChild>
+                      <Link href="/register" onClick={() => setOpen(false)}>
+                        Join the library <ArrowUpRight aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  </>
+                )}
                 <Button variant="outline" asChild>
                   <Link href="/login" onClick={() => setOpen(false)}>
                     Log in

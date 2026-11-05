@@ -6,7 +6,18 @@ import { safeCallbackUrl } from "@/lib/auth-redirect";
 
 export const metadata: Metadata = { title: "Register" };
 
-export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ callbackUrl?: string | string[] }> }) {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string | string[] }>;
+}) {
   const params = await searchParams;
-  return <AuthShell mode="register"><RegistrationForm googleEnabled={isGoogleConfigured()} callbackUrl={safeCallbackUrl(params.callbackUrl)} /></AuthShell>;
+  return (
+    <AuthShell mode="register">
+      <RegistrationForm
+        googleEnabled={isGoogleConfigured()}
+        callbackUrl={safeCallbackUrl(params.callbackUrl)}
+      />
+    </AuthShell>
+  );
 }

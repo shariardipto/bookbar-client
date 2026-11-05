@@ -7,7 +7,11 @@ export const { GET, POST } = toNextJsHandler(async (request: Request) => {
     return await getAuth().handler(request);
   } catch {
     return Response.json(
-      { code: "AUTH_UNAVAILABLE", message: "Membership is temporarily unavailable. Please try again shortly." },
+      {
+        code: "AUTH_UNAVAILABLE",
+        message:
+          "Membership is temporarily unavailable. Please try again shortly.",
+      },
       { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }
