@@ -2,21 +2,26 @@
 
 A small online library with a premium Midnight Editorial design: navy, porcelain, and copper. The product name is an owner-approved customization of the original BookNook assignment.
 
-**Current phase:** P01 public interface. The app presents a working collection preview; database, authentication, and borrowing integrations come in later phases.
+**Current phase:** P03 authentication is implemented; live acceptance is blocked by Atlas TLS connectivity. P02 database integration checks remain incomplete. Public browsing still uses labeled preview data.
 
 **Live website:** Not deployed; production deployment is scheduled for P08.
-**GitHub remote:** `origin` is configured locally. P01 changes are committed locally; no push is performed in this phase.
+**GitHub remote:** `origin` is configured locally. Changes are committed locally; no push is performed in this phase.
 
 ## Implemented features
 
 - A three-slide Swiper homepage with manual controls, book artwork, and six preview arrivals.
 - A nine-title collection with title/author search, five category filters, and sorting; filter state survives refresh through the URL.
 - Midnight Editorial styling with locally served DM Serif Display/Manrope and original vector book covers.
-- Responsive navigation, a focus-managed mobile menu, and a shared footer across public/account-preview/404 pages.
+- Responsive navigation, a focus-managed mobile menu, and a shared footer across public/member/404 pages.
 - Consistent book cards, accessible cover fallbacks, loading skeletons, a resettable empty state, and a retryable error boundary.
 - Route-specific titles, a custom favicon, and a custom 404 with working home/catalog navigation.
 
-The collection is explicitly labeled as sample data. Login/Register are membership-preview pages; sample detail links preserve their intended callback URL at the login entry. Real authentication/session checks begin in P03. No fake books, session, availability, provider integration, or live MongoDB query is presented as complete.
+- Better Auth 1.7.18 with the Mongo adapter, cookie-backed sessions, Google integration, and JWT/JWKS for the separate API.
+- Email registration with name, email, photo URL, and matching browser/server password rules: at least six characters, uppercase and lowercase. Registration continues to Login without automatically signing in.
+- Email login with safe local return paths, password visibility controls, inline errors and toast feedback. Google on Register goes Home; Google on Login preserves the intended page.
+- Server-checked private routes, session-aware navigation, account dropdown/logout, and a profile drawn from the authenticated session. Book management and borrowing pages are guarded placeholders until P06.
+
+The collection is explicitly labeled as sample data. Real persisted signup/login, private refresh, and Google's callback still need live verification; browser transport stubs only test UI behavior. Email verification and password reset are intentionally disabled.
 
 ## Planned library features
 
@@ -27,7 +32,7 @@ The collection is explicitly labeled as sample data. Login/Register are membersh
 - Review active loans and return books from My Borrows.
 - Keep authenticated access on private-page refresh and return to intended pages after login.
 
-Live database-backed catalog retrieval, registration/Google sign-in, book management, uploads, and borrowing remain planned features. P01's preview UI does not satisfy their live acceptance checks.
+Live database-backed catalog retrieval, book management, uploads, and borrowing remain planned features. Preview fixtures do not satisfy their database acceptance checks.
 
 ## Local setup
 
@@ -38,11 +43,13 @@ npm ci --include=dev
 npm run dev
 ```
 
-Open http://localhost:3000. No environment file or provider account is required for P00/P01. Later, copy `.env.example` to `.env.local` and populate values privately only as their setup gates are reached. Never expose database/auth/image secrets through `NEXT_PUBLIC_*` variables.
+Open http://localhost:3000 consistently for authentication. Copy `.env.example` to `.env.local` only if it does not exist, then populate values privately. Authentication requires `MONGODB_URI`, `MONGODB_DB_NAME`, a high-entropy `BETTER_AUTH_SECRET` of at least 32 characters, and `BETTER_AUTH_URL=http://localhost:3000`. Google requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`; blank/placeholder settings leave its button unavailable. Restart Next after environment changes. Never expose secrets through `NEXT_PUBLIC_*` variables or commit `.env.local`.
+
+Create a Google OAuth **Web application** client with origin `http://localhost:3000` and redirect URI `http://localhost:3000/api/auth/callback/google`. Configure consent and test users as appropriate to your Google project. Follow the [official provider guide](https://better-auth.com/docs/authentication/google). Production origins/callbacks are configured in P08.
 
 ## Commands
 
-P02 adds a lazy, server-only MongoDB connection for the future Better Auth adapter. Set `MONGODB_URI` and `MONGODB_DB_NAME=bookbar` privately in `.env.local`, then run `npm run db:check` to verify connectivity. This check never prints the connection string. The public P01 preview continues to run without credentials; authentication is not implemented yet. Restart the development process after changing database settings.
+Run `npm run db:check` to verify the pooled server-only MongoDB connection without printing the URI. Better Auth's adapter owns its auth collections and uses the same native Mongo client with transactions. The Next-owned `/api/auth/*` routes are separate from the eight assigned Express endpoints; no Express auth/profile routes are added.
 
 | Command | Purpose |
 | --- | --- |
@@ -51,14 +58,21 @@ P02 adds a lazy, server-only MongoDB connection for the future Better Auth adapt
 | `npm start` | Serve an existing production build on port 3000 |
 | `npm run lint` | ESLint, with no warnings allowed |
 | `npm run typecheck` | Generate Next.js route types, then strict TypeScript checks |
-| `npm test` | Run the catalog filter/sort unit tests |
+| `npm test` | Run unit tests |
 | `npm run test:e2e` | Run browser/accessibility/responsive tests against a production build |
 
-For browser verification, build first with `npm run build`, then run `npm run test:e2e` with port 3000 free. The configuration uses installed Google Chrome in headless mode and starts/stops its own Next.js process. Screenshots are saved to ignored `.cache/p01/`; the HTML report is in ignored `playwright-report/`. The tested public routes are `/`, `/books`, `/login`, `/register`, and `/a-lost-chapter` (404). `/books?category=Science` demonstrates a filtered entry; `/books/preview-time-machine` demonstrates the temporary login entry.
+For browser verification, build first, leave port 3000 free, and use installed Google Chrome. The configuration starts/stops its own Next process. Focused P03 commands:
+
+```powershell
+npm test -- src/lib/auth-validation.test.ts src/lib/auth-server.test.ts src/lib/member-session.test.ts src/lib/database.test.ts "src/app/api/auth/[...all]/route.test.ts"
+npm run test:e2e -- tests/e2e/authentication.spec.ts
+```
+
+Screenshots are saved to ignored `.cache/p01/` and `.cache/p03/`; the latest HTML report is in `playwright-report/`. Auth browser tests clearly label stubbed responses; the signed-out private-route checks use the real server guard. They cannot prove persistence, Google consent/callback completion, or JWT issuance from a real session.
 
 Original preview artwork can be regenerated with `node scripts/generate-preview-covers.mjs`. These covers are BookBar illustrations, not publisher-edition reproductions. Replace the documented fixture consumers during P06; real MongoDB sorting/limit and availability must be verified then. The footer still needs the owner's public contact details and profile links before launch.
 
-The client will own Better Auth session handling, JWKS, and the authenticated imgbb Server Action. The separate Express server will own book/borrow rules and validate service JWTs. Those integrations are not part of P00.
+The client owns Better Auth sessions and JWKS; the authenticated imgbb Server Action comes in P06. Express will validate service JWTs from `authClient.token()` in P04; a Better Auth session cookie is not the API bearer token. JWT issuer/audience match the configured auth origin, with a 15-minute lifetime.
 
 ## Documentation and delivery
 
