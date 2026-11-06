@@ -93,12 +93,12 @@ export function SiteFooter() {
               </a>
             </div>
             <p className="mt-2 text-[11px] text-slate">
-              Discover the platforms; our profiles are coming soon.
+              Discover the platforms; For the love of reading.
             </p>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© 2026 BookBar. For the love of reading.</p>
+          <p>© 2026 BookBar. All Rights Reserved</p>
           <Link href="/books" className="inline-flex items-center gap-1.5">
             Find your next chapter{" "}
             <ArrowUpRight className="size-3.5" aria-hidden="true" />
