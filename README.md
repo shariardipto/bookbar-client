@@ -2,10 +2,11 @@
 
 A small online library with a premium Midnight Editorial design: navy, porcelain, and copper. The product name is an owner-approved customization of the original BookNook assignment.
 
-**Current phase:** P07 automated QA passes; actual Google consent/callback remains a manual verification gate. The complete library UI uses real MongoDB-backed APIs and authenticated imgbb uploads. Email registration/login, private-page refresh, redirect-back and the add/edit/borrow/return/delete workflow pass real browser acceptance.
+**Status:** Deployed on Vercel with the separate Render API. Production email registration/login, private-route refresh, MongoDB retrieval and JWT/JWKS checks pass. Final submission verification is in progress; a successful production Google callback remains unverified.
 
-**Live website:** Not deployed; production deployment is scheduled for P08.
-**GitHub remote:** `origin` is configured locally. Changes are committed locally; no push is performed in this phase.
+**Live website:** [bookbar-app.vercel.app](https://bookbar-app.vercel.app)
+**Live API:** [bookbar-server.onrender.com/books](https://bookbar-server.onrender.com/books)
+**Repositories:** [Client](https://github.com/shariardipto/bookbar-client) · [Server](https://github.com/shariardipto/bookbar-server)
 
 ## Implemented features
 
@@ -13,7 +14,7 @@ A small online library with a premium Midnight Editorial design: navy, porcelain
 - A live collection with title/author search, five category filters, and sorting; filter state survives refresh through the URL. Desktop browsing uses three columns.
 - Midnight Editorial styling with locally served DM Serif Display/Manrope and original vector book covers.
 - Responsive navigation, a focus-managed mobile menu, and a shared footer across public/member/404 pages.
-- Consistent book cards, accessible cover fallbacks, loading skeletons, a resettable empty state, and a retryable error boundary.
+- Consistent book cards, accessible cover fallbacks, a loading spinner with skeletons, a resettable empty state, and retryable errors with toast feedback.
 - Route-specific titles, a custom favicon, and a custom 404 with working home/catalog navigation.
 
 - Better Auth 1.7.18 with the Mongo adapter, cookie-backed sessions, Google integration, and JWT/JWKS for the separate API.
@@ -26,7 +27,7 @@ A small online library with a premium Midnight Editorial design: navy, porcelain
 
 Runtime screens use real API records. Test fixtures only support deterministic public UI/filter checks; they are not live integration evidence. Real email sessions/JWTs and private browser refresh pass. Google's callback remains unverified. Email verification and password reset are intentionally disabled.
 
-Google callback verification and production deployment remain outstanding. P07 found and fixed missing cancellation feedback when Google/Better Auth returns repeated `error` query parameters; login now recognizes the Google marker in that array.
+The production Google start endpoint supplies the Vercel callback, and cancellation recovery passes. These checks do not prove successful Google consent or session creation.
 
 ## Local setup
 
@@ -43,7 +44,13 @@ When the configured auth origin is local `http://localhost`, opening `127.0.0.1`
 
 Run the sibling Express server on port 5000 and set `NEXT_PUBLIC_API_BASE_URL=http://localhost:5000`. Save `IMGBB_API_KEY` only in the private client server environment. Cover uploads require a current server-verified session and accept PNG/JPEG/WebP/GIF up to 5 MB with format-signature validation. The Next action has a 6 MB request limit for multipart overhead. Only the public hosted URL returns to the browser; provider credentials and deletion links stay private. No Express upload endpoint is added.
 
-Create a Google OAuth **Web application** client with origin `http://localhost:3000` and redirect URI `http://localhost:3000/api/auth/callback/google`. Configure consent and test users as appropriate to your Google project. Follow the [official provider guide](https://better-auth.com/docs/authentication/google). Production origins/callbacks are configured in P08.
+Create a Google OAuth **Web application** client with origin `http://localhost:3000` and redirect URI `http://localhost:3000/api/auth/callback/google`. Configure consent and test users as appropriate to your Google project. Follow the [official provider guide](https://better-auth.com/docs/authentication/google).
+
+## Production configuration
+
+On Vercel, set `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` to `https://bookbar-app.vercel.app`, and `NEXT_PUBLIC_API_BASE_URL` to `https://bookbar-server.onrender.com`. Enter MongoDB, Better Auth, Google and ImgBB credentials only in private deployment settings. Redeploy after changing public build variables.
+
+Google's authorized origin is `https://bookbar-app.vercel.app`; the authorized redirect URI is `https://bookbar-app.vercel.app/api/auth/callback/google`. Verify a real login through [Login → Profile](https://bookbar-app.vercel.app/login?callbackUrl=%2Fprofile), then hard-refresh Profile. A successful OAuth-start response alone is insufficient.
 
 ## Commands
 
@@ -72,7 +79,7 @@ Screenshots are saved to ignored `.cache/p01/`, `.cache/p03/` and `.cache/p06/`;
 
 P07 extends live QA with refresh/title/empty-state checks for Profile, My Books and My Borrows, missing-book feedback, malformed-cover rejection/recovery, and real logout. The Google-start test checks the configured local callback/scopes, then simulates `access_denied` to consume its one-time state and verify safe retry feedback. This does not establish a successful Google login. Automated evidence: 73 client unit tests, 91 server unit tests, 18 browser scenarios, 11 real API acceptance groups, 9 Atlas concurrency/rollback groups, and the expanded live browser checks pass; both repositories pass lint/typecheck/build.
 
-To finish the manual Google gate with both apps running, open http://localhost:3000/login?callbackUrl=%2Fprofile, choose **Continue with Google**, and complete account selection/consent in your own browser. Confirm the return to Profile and that a hard refresh keeps the session. Share only PASS/FAIL or a short provider error code, never passwords, codes, cookies, tokens, or the full authorization/callback URL.
+To finish the production Google gate, use the production Login → Profile link above, choose **Continue with Google**, and complete account selection/consent in your own browser. Confirm the return to Profile and that a hard refresh keeps the session. Share only PASS/FAIL or a short provider error code, never passwords, codes, cookies, tokens, or the full authorization/callback URL.
 
 Original promotional artwork can be regenerated with `node scripts/generate-preview-covers.mjs`. These covers are BookBar illustrations, not publisher-edition reproductions. Runtime collection records come from MongoDB; preview fixture objects remain test-only. The footer still needs the owner's public contact details and profile links before launch.
 
@@ -86,6 +93,4 @@ The client owns Better Auth sessions, JWKS and the authenticated imgbb Server Ac
 
 ## Documentation and delivery
 
-See [blueprint](docs/BookBar_Master_Blueprint.md), [decisions](docs/DECISIONS.md), [implementation log](docs/IMPLEMENTATION_LOG.md), [handoffs](docs/MANUAL_HANDOFFS.md), [test report](docs/TEST_REPORT.md), and [dependency versions](docs/DEPENDENCIES.md). The original assignment is retained in `docs/B14-A8-Cat_Ron.md`.
-
-Each future coherent change should receive a meaningful commit, targeting at least 15 client commits by submission. Live URLs and remote links will be added after they exist.
+Submit the [client repository](https://github.com/shariardipto/bookbar-client), [server repository](https://github.com/shariardipto/bookbar-server), and [live website](https://bookbar-app.vercel.app). The assignment requires at least 15 meaningful client commits and 8 server commits. Internal planning and audit documents are maintained in the workspace rather than published in either repository.
