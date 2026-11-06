@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import { BookOpen, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApiRequestError } from "@/lib/api-client";
@@ -19,6 +21,10 @@ export function LibraryError({
   retry: () => void;
 }) {
   const pathname = usePathname();
+  const message = libraryMessage(error);
+  useEffect(() => {
+    toast.error(message);
+  }, [message]);
   const auth = error instanceof ApiRequestError && error.status === 401;
   const missing = error instanceof ApiRequestError && error.status === 404;
   return (
@@ -31,7 +37,7 @@ export function LibraryError({
             ? "This book has left the shelf."
             : "The shelf needs a moment."}
       </h2>
-      <p className="body-copy mt-3 max-w-md">{libraryMessage(error)}</p>
+      <p className="body-copy mt-3 max-w-md">{message}</p>
       <div className="flex flex-wrap justify-center gap-3 mt-6">
         {auth ? (
           <Button asChild>

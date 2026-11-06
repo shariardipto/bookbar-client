@@ -58,29 +58,39 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className="ml-auto flex items-center gap-2">
             {isPending ? (
-              <span className="account-loading" role="status">
+              <span className="account-loading hidden lg:inline" role="status">
                 Checking membership…
               </span>
             ) : data?.user ? (
               <AccountMenu user={data.user} />
             ) : error ? (
-              <Button variant="ghost" onClick={() => refetch()}>
+              <Button
+                className="hidden lg:inline-flex"
+                variant="ghost"
+                onClick={() => refetch()}
+              >
                 Retry session
               </Button>
             ) : (
               <>
-                <Button variant="ghost" asChild>
+                <Button
+                  className="hidden lg:inline-flex"
+                  variant="ghost"
+                  asChild
+                >
                   <Link href="/login">Log in</Link>
                 </Button>
               </>
             )}
-            <Button asChild>
-              <Link href="/register">
-                Join the library <ArrowUpRight aria-hidden="true" />
-              </Link>
-            </Button>
+            {!data?.user && (
+              <Button className="hidden lg:inline-flex" asChild>
+                <Link href="/register">
+                  Join the library <ArrowUpRight aria-hidden="true" />
+                </Link>
+              </Button>
+            )}
           </div>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -147,13 +157,13 @@ export function SiteHeader() {
                         Join the library <ArrowUpRight aria-hidden="true" />
                       </Link>
                     </Button>
+                    <Button variant="outline" asChild>
+                      <Link href="/login" onClick={() => setOpen(false)}>
+                        Log in
+                      </Link>
+                    </Button>
                   </>
                 )}
-                <Button variant="outline" asChild>
-                  <Link href="/login" onClick={() => setOpen(false)}>
-                    Log in
-                  </Link>
-                </Button>
               </div>
               <p className="mt-auto pt-8 text-xs leading-relaxed text-slate">
                 A little space for your next chapter.

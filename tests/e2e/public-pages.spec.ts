@@ -306,9 +306,19 @@ test("library loading, empty and retry states use API outcomes", async ({
   await expect(
     page.getByRole("status", { name: "Loading books" }),
   ).toBeVisible();
+  await expect(
+    page
+      .getByRole("status", { name: "Loading books" })
+      .locator("[data-loading-spinner]"),
+  ).toBeVisible();
   release();
   await expect(
     page.getByRole("heading", { name: "The shelf needs a moment." }),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator("[data-sonner-toast]")
+      .filter({ hasText: "The library is temporarily unavailable." }),
   ).toBeVisible();
   fail = false;
   await page.getByRole("button", { name: "Try again", exact: true }).click();

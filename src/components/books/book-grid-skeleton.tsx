@@ -1,9 +1,15 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoaderCircle } from "lucide-react";
 
 export function BookGridSkeleton() {
   return (
     <div role="status" aria-label="Loading books">
       <span className="sr-only">Loading the shelves…</span>
+      <LoaderCircle
+        data-loading-spinner
+        className="mx-auto mb-6 size-7 animate-spin text-slate motion-reduce:animate-none"
+        aria-hidden="true"
+      />
       <div className="book-grid" aria-hidden="true">
         {Array.from({ length: 6 }, (_, index) => (
           <div key={index} className="rounded-xl border bg-white p-3.5">

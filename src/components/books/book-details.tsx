@@ -97,10 +97,10 @@ export function BookDetails({
                 setBorrowDate(new Date());
               }}
             >
-              {alreadyBorrowed
-                ? "Already on your reading shelf"
-                : !item.copies
-                  ? "All copies are being read"
+              {!item.copies
+                ? "Not Available"
+                : alreadyBorrowed
+                  ? "Already on your reading shelf"
                   : loans.isPending
                     ? "Checking your shelf…"
                     : "Borrow this book"}

@@ -108,6 +108,7 @@ export function BookForm({
           toast.error(result.message);
         }
       } catch {
+        toast.error("The cover could not be uploaded. Please try again.");
         setError("imageUrl", {
           message: "The cover could not be uploaded. Please try again.",
         });

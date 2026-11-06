@@ -177,7 +177,22 @@ test("stubbed session drives keyboard account navigation, survives UI reload, an
       size.content,
       `member navigation overflows at ${width}px`,
     ).toBeLessThanOrEqual(size.viewport + 1);
+    await expect(
+      page.getByRole("button", { name: "Open account menu for Avery Reader" }),
+    ).toBeVisible();
   }
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await page.getByRole("button", { name: "Open navigation menu" }).click();
+  await expect(
+    page.getByRole("dialog").getByRole("link", { name: "Log in", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page
+      .getByRole("dialog")
+      .getByRole("link", { name: "Join the library", exact: true }),
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.setViewportSize({ width: 1440, height: 1000 });
   const trigger = page.getByRole("button", {
     name: "Open account menu for Avery Reader",
   });

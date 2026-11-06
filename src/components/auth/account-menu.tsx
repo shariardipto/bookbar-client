@@ -70,7 +70,9 @@ export function AccountMenu({
           title={user.name}
         >
           <MemberAvatar name={user.name} image={user.image} decorative />
-          <span className="max-w-24 truncate">{user.name.split(" ")[0]}</span>
+          <span className="hidden max-w-24 truncate sm:inline">
+            {user.name.split(" ")[0]}
+          </span>
           <ChevronDown aria-hidden="true" />
         </Button>
       </DropdownMenu.Trigger>
