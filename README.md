@@ -9,7 +9,7 @@ A small online library with a premium Midnight Editorial design: navy, porcelain
 
 ## Implemented features
 
-- A five-slide Swiper hero that advances every five seconds, with pause/play, arrows, dots, hover pause and reduced-motion support; the homepage also shows the latest six arrivals sorted and limited by MongoDB.
+- A five-slide Swiper hero that advances every five seconds, with arrows, dots, hover pause and reduced-motion support; the homepage also shows the latest six arrivals sorted and limited by MongoDB.
 - A live collection with title/author search, five category filters, and sorting; filter state survives refresh through the URL. Desktop browsing uses three columns.
 - Midnight Editorial styling with locally served DM Serif Display/Manrope and original vector book covers.
 - Responsive navigation, a focus-managed mobile menu, and a shared footer across public/member/404 pages.

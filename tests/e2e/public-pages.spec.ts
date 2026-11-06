@@ -63,7 +63,10 @@ test("home renders six API records and five navigable hero slides", async ({
   await expect(
     page.getByText("These are sample titles", { exact: false }),
   ).not.toBeVisible();
-  await page.getByRole("button", { name: "Pause automatic slides" }).click();
+  await page.getByRole("button", { name: "Next slide", exact: true }).focus();
+  await expect(
+    page.getByRole("button", { name: /automatic slides/ }),
+  ).toHaveCount(0);
   await expect(page.locator(".swiper-slide")).toHaveCount(5);
   await expect(page.locator(".swiper-slide-active")).toContainText(
     "Your next chapter",
@@ -112,7 +115,7 @@ test("home renders six API records and five navigable hero slides", async ({
   expect(errors).toEqual([]);
 });
 
-test("hero autoplay advances, pauses on hover and supports pause and resume", async ({
+test("hero autoplay advances and resumes after hover without play/pause controls", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -130,15 +133,9 @@ test("hero autoplay advances, pauses on hover and supports pause and resume", as
   await expect(current).not.toHaveAttribute("aria-label", hovered!, {
     timeout: 7500,
   });
-  await page.getByRole("button", { name: "Pause automatic slides" }).click();
-  const paused = await current.getAttribute("aria-label");
-  await page.waitForTimeout(5500);
-  await expect(current).toHaveAttribute("aria-label", paused!);
-  await page.getByRole("button", { name: "Start automatic slides" }).click();
-  await page.mouse.move(0, 0);
-  await expect(current).not.toHaveAttribute("aria-label", paused!, {
-    timeout: 7500,
-  });
+  await expect(
+    page.getByRole("button", { name: /automatic slides/ }),
+  ).toHaveCount(0);
 });
 
 test("hero respects reduced motion and pauses when keyboard focus enters", async ({
@@ -148,25 +145,26 @@ test("hero respects reduced motion and pauses when keyboard focus enters", async
   await page.goto("/");
   const current = page.locator(".hero-dot[aria-current=true]");
   await expect(
-    page.getByRole("button", { name: "Start automatic slides" }),
-  ).toBeVisible();
+    page.getByRole("button", { name: /automatic slides/ }),
+  ).toHaveCount(0);
   await page.waitForTimeout(5500);
   await expect(current).toHaveAttribute("aria-label", "Go to slide 1");
-  await page.getByRole("button", { name: "Start automatic slides" }).click();
-  await page.mouse.move(0, 0);
-  await expect(current).toHaveAttribute("aria-label", "Go to slide 2", {
-    timeout: 7500,
-  });
   await page.getByRole("button", { name: "Next slide", exact: true }).focus();
-  await expect(
-    page.getByRole("button", { name: "Start automatic slides" }),
-  ).toBeVisible();
   await page.keyboard.press("Enter");
-  await expect(current).toHaveAttribute("aria-label", "Go to slide 3");
+  await expect(current).toHaveAttribute("aria-label", "Go to slide 2");
   await expect(page.locator(".hero-counter")).toHaveAttribute(
     "aria-live",
     "polite",
   );
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page
+    .getByRole("banner")
+    .getByRole("link", { name: "BookBar home", exact: true })
+    .focus();
+  await page.mouse.move(0, 0);
+  await expect(current).toHaveAttribute("aria-label", "Go to slide 3", {
+    timeout: 7500,
+  });
 });
 
 test("all five hero slides and controls fit mobile, tablet and desktop", async ({

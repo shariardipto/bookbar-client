@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Swiper as SwiperInstance } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Autoplay, Keyboard } from "swiper/modules";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Pause, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/books/book-cover";
 import "swiper/css";
@@ -87,16 +87,13 @@ export function HeroSlider() {
   const slider = useRef<SwiperInstance | null>(null);
   const [active, setActive] = useState(0);
   const [moving, setMoving] = useState(false);
-  const [rotation, setRotation] = useState<"auto" | "paused" | "playing">(
-    "auto",
-  );
+  const [focused, setFocused] = useState(false);
   const reducedMotion = useSyncExternalStore(
     subscribeToMotionPreference,
     () => window.matchMedia(motionQuery).matches,
     () => true,
   );
-  const playing =
-    rotation === "playing" || (rotation === "auto" && !reducedMotion);
+  const playing = !focused && !reducedMotion;
   useEffect(() => {
     if (playing) slider.current?.autoplay.start();
     else slider.current?.autoplay.stop();
@@ -105,12 +102,10 @@ export function HeroSlider() {
     <section
       className="hero-shell"
       aria-label="Discover BookBar"
-      onFocusCapture={(event) => {
-        if (!(
-          event.target instanceof HTMLElement &&
-          event.target.closest("[data-autoplay-control]")
-        ))
-          setRotation("paused");
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setFocused(false);
       }}
     >
       <Swiper
@@ -234,25 +229,6 @@ export function HeroSlider() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            data-autoplay-control
-            aria-label={
-              playing ? "Pause automatic slides" : "Start automatic slides"
-            }
-            title={
-              playing ? "Pause automatic slides" : "Start automatic slides"
-            }
-            className="hero-arrow"
-            onClick={() => setRotation(playing ? "paused" : "playing")}
-          >
-            {playing ? (
-              <Pause aria-hidden="true" />
-            ) : (
-              <Play aria-hidden="true" />
-            )}
-          </Button>
           <Button
             variant="outline"
             size="icon"
