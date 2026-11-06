@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:live": "node --env-file=.env.local node_modules/@playwright/test/cli.js test --config=playwright.live.config.ts",
+    "seed:demo": "node --env-file=.env.local scripts/seed-demo-books.mjs",
     "db:check": "node --conditions=react-server --env-file-if-exists=.env.local scripts/check-database.mjs"
   },
   "dependencies": {

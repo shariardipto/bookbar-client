@@ -59,6 +59,7 @@ Run `npm run db:check` to verify the pooled server-only MongoDB connection witho
 | `npm test` | Run unit tests |
 | `npm run test:e2e` | Run browser/accessibility/responsive tests against a production build |
 | `npm run test:live` | Opt-in real-provider/Atlas QA; both apps must be built and ports 3000/5000 free |
+| `npm run seed:demo` | Add the 14 additional demo titles once through the existing authenticated API and verify the pages |
 
 For browser verification, build first, leave port 3000 free, and use installed Google Chrome. The configuration starts/stops its own Next process. Focused P03 commands:
 
@@ -73,7 +74,11 @@ P07 extends live QA with refresh/title/empty-state checks for Profile, My Books 
 
 To finish the manual Google gate with both apps running, open http://localhost:3000/login?callbackUrl=%2Fprofile, choose **Continue with Google**, and complete account selection/consent in your own browser. Confirm the return to Profile and that a hard refresh keeps the session. Share only PASS/FAIL or a short provider error code, never passwords, codes, cookies, tokens, or the full authorization/callback URL.
 
-Original promotional artwork can be regenerated with `node scripts/generate-preview-covers.mjs`. These covers are BookBar illustrations, not publisher-edition reproductions. Runtime collection records come from MongoDB; sample records remain test-only. The footer still needs the owner's public contact details and profile links before launch.
+Original promotional artwork can be regenerated with `node scripts/generate-preview-covers.mjs`. These covers are BookBar illustrations, not publisher-edition reproductions. Runtime collection records come from MongoDB; preview fixture objects remain test-only. The footer still needs the owner's public contact details and profile links before launch.
+
+The persistent demo collection contains the original nine starter records plus fourteen additional titles across all five categories. The extension dataset and controlled CLI live separately in `scripts/data/demo-books.mjs` and `scripts/seed-demo-books.mjs`; production code does not import them. Both local apps must be running; use development dependencies and installed Google Chrome. Run `npm run seed:demo` with the existing private `.env.local` settings and a private `.env.seed.local` containing `BOOKBAR_SEED_EMAIL`/`BOOKBAR_SEED_PASSWORD` for the authorized starter account. New covers require server-only `IMGBB_API_KEY`; generated PNGs/manifests remain ignored under `.cache/demo-seed/`. No credentials are printed or committed.
+
+The command uses normal Better Auth sign-in/JWT issuance and `POST /books`, so the API supplies ownership, `createdAt` and initial stock. It never patches or deletes books, skips normalized title/author matches, locks concurrent local runs, preserves partial upload progress and checks full existing-record fingerprints. Covers are original BookBar vector designs rendered to PNG and genuinely hosted on imgbb. The command verifies real All Books images, Home latest-six IDs and all fourteen private Book Details pages, then logs out its sessions. Focused seed checks: `node --test scripts/seed-demo-books.test.mjs`.
 
 The client owns Better Auth sessions, JWKS and the authenticated imgbb Server Action. Express validates service JWTs from `authClient.token()`; a Better Auth session cookie is not the API bearer token. JWT issuer/audience match the configured auth origin, with a 15-minute lifetime.
 
