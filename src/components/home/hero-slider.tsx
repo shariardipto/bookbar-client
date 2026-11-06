@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Swiper as SwiperInstance } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { A11y, Keyboard } from "swiper/modules";
-import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
+import { A11y, Autoplay, Keyboard } from "swiper/modules";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/books/book-cover";
 import "swiper/css";
@@ -50,19 +50,79 @@ const slides = [
       "The Art of War",
     ],
   },
+  {
+    eyebrow: "Small moments. Lasting stories.",
+    line: "Make a little time",
+    emphasis: "for a good book.",
+    description:
+      "Trade the everyday rush for a few quiet pages. Revisit a classic, meet a new voice, and let the story set the pace.",
+    note: "A slower moment, a richer day.",
+    books: ["room-own", "little-women", "pride-prejudice"],
+    titles: ["A Room of One’s Own", "Little Women", "Pride and Prejudice"],
+  },
+  {
+    eyebrow: "For little readers and big dreamers",
+    line: "Let imagination",
+    emphasis: "lead the way.",
+    description:
+      "Step through a secret garden, follow a curious rabbit, or share a tale together. Every great reading journey begins with a little wonder.",
+    note: "Big adventures begin with small pages.",
+    books: ["alice", "secret-garden", "time-machine"],
+    titles: [
+      "Alice’s Adventures in Wonderland",
+      "The Secret Garden",
+      "The Time Machine",
+    ],
+  },
 ];
+
+const motionQuery = "(prefers-reduced-motion: reduce)";
+function subscribeToMotionPreference(notify: () => void) {
+  const media = window.matchMedia(motionQuery);
+  media.addEventListener("change", notify);
+  return () => media.removeEventListener("change", notify);
+}
 
 export function HeroSlider() {
   const slider = useRef<SwiperInstance | null>(null);
   const [active, setActive] = useState(0);
   const [moving, setMoving] = useState(false);
+  const [rotation, setRotation] = useState<"auto" | "paused" | "playing">(
+    "auto",
+  );
+  const reducedMotion = useSyncExternalStore(
+    subscribeToMotionPreference,
+    () => window.matchMedia(motionQuery).matches,
+    () => true,
+  );
+  const playing =
+    rotation === "playing" || (rotation === "auto" && !reducedMotion);
+  useEffect(() => {
+    if (playing) slider.current?.autoplay.start();
+    else slider.current?.autoplay.stop();
+  }, [playing]);
   return (
-    <section className="hero-shell" aria-label="Discover BookBar">
+    <section
+      className="hero-shell"
+      aria-label="Discover BookBar"
+      onFocusCapture={(event) => {
+        if (!(
+          event.target instanceof HTMLElement &&
+          event.target.closest("[data-autoplay-control]")
+        ))
+          setRotation("paused");
+      }}
+    >
       <Swiper
-        modules={[A11y, Keyboard]}
+        modules={[A11y, Autoplay, Keyboard]}
         slidesPerView={1}
-        speed={500}
+        speed={reducedMotion ? 0 : 500}
         loop
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        }}
         keyboard={{ enabled: true, onlyInViewport: true, pageUpDown: false }}
         a11y={{
           containerMessage: "BookBar reading inspiration",
@@ -70,6 +130,7 @@ export function HeroSlider() {
         }}
         onSwiper={(instance) => {
           slider.current = instance;
+          if (!playing) instance.autoplay.stop();
         }}
         onSlideChange={(instance) => setActive(instance.realIndex)}
         onTransitionStart={() => setMoving(true)}
@@ -112,7 +173,7 @@ export function HeroSlider() {
                 </div>
                 <div
                   className="hero-art"
-                  aria-label="A selection of preview book covers"
+                  aria-label="A selection of original BookBar cover illustrations"
                 >
                   <div
                     className="hero-orbit hero-orbit-one"
@@ -146,9 +207,15 @@ export function HeroSlider() {
       </Swiper>
       <div className="hero-controls">
         <div className="flex items-center gap-3">
-          <span className="hero-counter" aria-live="polite" aria-atomic="true">
-            <span className="sr-only">Slide </span>0{active + 1}
-            <span className="mx-2 text-white/45">/</span>03
+          <span
+            className="hero-counter"
+            aria-live={playing ? "off" : "polite"}
+            aria-atomic="true"
+          >
+            <span className="sr-only">Slide </span>
+            {String(active + 1).padStart(2, "0")}
+            <span className="mx-2 text-white/45">/</span>
+            {String(slides.length).padStart(2, "0")}
           </span>
           <div className="flex" aria-label="Choose a slide">
             {slides.map((slide, index) => (
@@ -167,6 +234,25 @@ export function HeroSlider() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            data-autoplay-control
+            aria-label={
+              playing ? "Pause automatic slides" : "Start automatic slides"
+            }
+            title={
+              playing ? "Pause automatic slides" : "Start automatic slides"
+            }
+            className="hero-arrow"
+            onClick={() => setRotation(playing ? "paused" : "playing")}
+          >
+            {playing ? (
+              <Pause aria-hidden="true" />
+            ) : (
+              <Play aria-hidden="true" />
+            )}
+          </Button>
           <Button
             variant="outline"
             size="icon"

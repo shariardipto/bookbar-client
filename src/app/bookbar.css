@@ -1584,7 +1584,7 @@ body [data-sonner-toaster][data-sonner-theme="light"] {
     height: 255px;
   }
   .hero-art-note {
-    bottom: -3px;
+    bottom: -25px;
   }
   .hero-actions {
     gap: 14px;
@@ -1618,6 +1618,18 @@ body [data-sonner-toaster][data-sonner-theme="light"] {
   }
 }
 @media (max-width: 639px) {
+  .hero-slide {
+    padding-bottom: 145px;
+  }
+  .hero-controls {
+    flex-wrap: wrap;
+    justify-content: end;
+    gap: 8px;
+  }
+  .hero-controls > :first-child {
+    width: 100%;
+    justify-content: space-between;
+  }
   .site-container {
     width: calc(100% - 40px);
   }

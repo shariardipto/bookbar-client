@@ -51,10 +51,11 @@ test("loopback URLs preserve filters and private destinations on the canonical h
   );
 });
 
-test("home renders six API records and three usable, manually controlled slides", async ({
+test("home renders six API records and five navigable hero slides", async ({
   page,
 }) => {
   const errors: string[] = [];
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
   await expect(page).toHaveTitle("BookBar | Home");
@@ -62,7 +63,8 @@ test("home renders six API records and three usable, manually controlled slides"
   await expect(
     page.getByText("These are sample titles", { exact: false }),
   ).not.toBeVisible();
-  await expect(page.locator(".swiper-slide")).toHaveCount(3);
+  await page.getByRole("button", { name: "Pause automatic slides" }).click();
+  await expect(page.locator(".swiper-slide")).toHaveCount(5);
   await expect(page.locator(".swiper-slide-active")).toContainText(
     "Your next chapter",
   );
@@ -70,7 +72,7 @@ test("home renders six API records and three usable, manually controlled slides"
   await expect(page.locator(".swiper-slide-active")).toContainText(
     "Stay curious.",
   );
-  await expect(page.locator(".swiper-slide[aria-hidden=true]")).toHaveCount(2);
+  await expect(page.locator(".swiper-slide[aria-hidden=true]")).toHaveCount(4);
   expect(
     await page
       .locator(".swiper-slide[aria-hidden=true]")
@@ -91,11 +93,136 @@ test("home renders six API records and three usable, manually controlled slides"
     "Stay curious.",
   );
   await page
+    .getByRole("button", { name: "Go to slide 4", exact: true })
+    .click();
+  await expect(page.locator(".swiper-slide-active")).toContainText(
+    "for a good book.",
+  );
+  await page
+    .getByRole("button", { name: "Go to slide 5", exact: true })
+    .click();
+  await expect(page.locator(".swiper-slide-active")).toContainText(
+    "lead the way.",
+  );
+  await page
     .locator(".swiper-slide-active")
     .getByRole("link", { name: "Browse Books", exact: true })
     .click();
   await expect(page).toHaveURL(/\/books$/);
   expect(errors).toEqual([]);
+});
+
+test("hero autoplay advances, pauses on hover and supports pause and resume", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await page.mouse.move(0, 0);
+  const current = page.locator(".hero-dot[aria-current=true]");
+  await expect(current).toHaveAttribute("aria-label", "Go to slide 2", {
+    timeout: 7500,
+  });
+  await page.locator(".swiper-slide-active .hero-copy").hover();
+  const hovered = await current.getAttribute("aria-label");
+  await page.waitForTimeout(5500);
+  await expect(current).toHaveAttribute("aria-label", hovered!);
+  await page.mouse.move(0, 0);
+  await expect(current).not.toHaveAttribute("aria-label", hovered!, {
+    timeout: 7500,
+  });
+  await page.getByRole("button", { name: "Pause automatic slides" }).click();
+  const paused = await current.getAttribute("aria-label");
+  await page.waitForTimeout(5500);
+  await expect(current).toHaveAttribute("aria-label", paused!);
+  await page.getByRole("button", { name: "Start automatic slides" }).click();
+  await page.mouse.move(0, 0);
+  await expect(current).not.toHaveAttribute("aria-label", paused!, {
+    timeout: 7500,
+  });
+});
+
+test("hero respects reduced motion and pauses when keyboard focus enters", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const current = page.locator(".hero-dot[aria-current=true]");
+  await expect(
+    page.getByRole("button", { name: "Start automatic slides" }),
+  ).toBeVisible();
+  await page.waitForTimeout(5500);
+  await expect(current).toHaveAttribute("aria-label", "Go to slide 1");
+  await page.getByRole("button", { name: "Start automatic slides" }).click();
+  await page.mouse.move(0, 0);
+  await expect(current).toHaveAttribute("aria-label", "Go to slide 2", {
+    timeout: 7500,
+  });
+  await page.getByRole("button", { name: "Next slide", exact: true }).focus();
+  await expect(
+    page.getByRole("button", { name: "Start automatic slides" }),
+  ).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(current).toHaveAttribute("aria-label", "Go to slide 3");
+  await expect(page.locator(".hero-counter")).toHaveAttribute(
+    "aria-live",
+    "polite",
+  );
+});
+
+test("all five hero slides and controls fit mobile, tablet and desktop", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await mkdir(".cache/hero", { recursive: true });
+  await page.goto("/");
+  for (const width of [360, 480, 768, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    for (let slide = 1; slide <= 5; slide++) {
+      await page
+        .getByRole("button", { name: `Go to slide ${slide}`, exact: true })
+        .click();
+      await expect(
+        page.locator(".hero-dot[aria-current=true]"),
+      ).toHaveAttribute("aria-label", `Go to slide ${slide}`);
+      expect(
+        await page.evaluate(
+          () =>
+            document.documentElement.scrollWidth <=
+            document.documentElement.clientWidth + 1,
+        ),
+      ).toBe(true);
+      const boxes = await page
+        .locator(".hero-controls")
+        .evaluate((element) => ({
+          controls: element.getBoundingClientRect().toJSON(),
+          children: [...element.children].map((child) =>
+            child.getBoundingClientRect().toJSON(),
+          ),
+        }));
+      expect(
+        boxes.children.every(
+          (child) =>
+            child.left >= boxes.controls.left - 1 &&
+            child.right <= boxes.controls.right + 1,
+        ),
+      ).toBe(true);
+    }
+    await page
+      .locator(".hero-shell")
+      .screenshot({ path: `.cache/hero/slide-five-${width}.png` });
+    if (width === 360 || width === 1440) {
+      const result = await new AxeBuilder({ page })
+        .include(".hero-shell")
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+        .analyze();
+      expect(
+        result.violations.map((issue) => ({
+          id: issue.id,
+          nodes: issue.nodes.map((node) => node.target),
+        })),
+      ).toEqual([]);
+    }
+  }
 });
 
 test("catalog combines search/category, persists on refresh, sorts, and resets an empty result", async ({
